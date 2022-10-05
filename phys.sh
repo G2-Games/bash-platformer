@@ -3,7 +3,7 @@
 stty -echo # Disable keyboard output
 
 source options.cfg # Grab configs
-source functions
+source functions.sh
 
 startup
 
@@ -16,7 +16,7 @@ while true; do
 
     render      #render the player, stage, and platforms
 
-    info        #display the velocity and position information
+    #info        #display the velocity and position information
 
     tput cup 21 80
     if [[ "$input" = "q" ]] || [[ $win -gt 0 ]]; then
