@@ -12,4 +12,4 @@ To run, just clone the repository and run `./phys.sh`
 
 I might not work on this much more, it was a neat idea
 
-![image](https://github.com/G2-Games/bash-platformer/assets/72430668/e7aa0fa3-56df-4557-bdcf-13b1c2775c46)
+![platformer](https://github.com/G2-Games/bash-platformer/assets/72430668/765326ed-7b8a-4d5c-b5ad-51eeeb95548c)
