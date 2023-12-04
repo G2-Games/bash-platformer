@@ -19,7 +19,7 @@ while true; do
     #info        #display the velocity and position information
 
     tput cup 21 80
-    if [[ "$input" = "q" ]] || [[ $win -gt 0 ]]; then
+    if [[ "$input" = "q" ]]; then
         stty echo
         tput cup 22 0
         textbox 10 39 "Exiting Game"
@@ -27,5 +27,5 @@ while true; do
         exit 0
     fi
 
-    sleep $fps
+    sleep "$fps"
 done

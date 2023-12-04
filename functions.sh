@@ -1,14 +1,12 @@
-startup () {
-    if [[ "$music" == "on" ]]; then
-        play -v 0.5 -q audio/bgm.mp3 &
-    fi
+#!/bin/bash
 
+startup () {
     #================Level===============#
     # Define platforms
     platformX=( 0 10 30 38 60)
     platformY=(10 13 17 10  9)
     platformW=( 9 15  9  9  9)
-    platformH=( 1  1  1  1  1)
+    _platformH=( 1  1  1  1  1)
     platformI=(02 00 00 00 01)
 
     # Set player start position
@@ -23,12 +21,11 @@ startup () {
     charactercrouch=🬋
 
     # Set other "sprites"
-    coin=₪
-    number=(🯰 🯱 🯲 🯳 🯴 🯵 🯶 🯷 🯸 🯹)
+    number=(① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨ ⑩)
 
     velX=0
     velY=0
-    win=0
+    _win=0
 
     fps=$(awk "BEGIN {print 1/$fps}")
 }
@@ -36,7 +33,7 @@ startup () {
 stage () {
     tput home
     echo -e "
-\e[A▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█  \e[94mLVL${number[1]} \e[0m █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+\e[A▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█  \e[94mLVL${number[0]} \e[0m █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 ▌                                                                              ▐
 ▌                                                                              ▐
 ▌                                                                              ▐
@@ -67,36 +64,36 @@ platforms () {
         loops=0
         case ${platformI[$loop]} in
         00) # Standard platform
-            tput cup ${platformY[$loop]} $((platformX[$loop]))
+            tput cup "${platformY[$loop]}" $((platformX["$loop"]))
             echo -en "\e[30;1m🭒"
-            while [[ $loops -lt $((platformW[$loop] - 2)) ]]; do
+            while [[ $loops -lt $((platformW["$loop"] - 2)) ]]; do
                 echo -en "█"
                 loops=$((loops + 1))
             done
             echo -en "🭝"
             ;;
         01) # Goal platform
-            tput cup ${platformY[$loop]} $((platformX[$loop]))
+            tput cup "${platformY[$loop]}" $((platformX["$loop"]))
             echo -en "\e[33;1m🭒"
-            while [[ $loops -lt $((platformW[$loop] - 2)) ]]; do
+            while [[ $loops -lt $((platformW["$loop"] - 2)) ]]; do
                 echo -en "🬗"
                 loops=$((loops + 1))
             done
             echo -en "🭝"
             ;;
         02) # Left wall platform
-            tput cup ${platformY[$loop]} $((platformX[$loop]))
+            tput cup "${platformY[$loop]}" $((platformX["$loop"]))
             echo -en "\e[30;1m█"
-            while [[ $loops -lt $((platformW[$loop] - 2)) ]]; do
+            while [[ $loops -lt $((platformW["$loop"] - 2)) ]]; do
                 echo -en "█"
                 loops=$((loops + 1))
             done
             echo -en "🭝"
             ;;
         03) # Left wall platform
-            tput cup ${platformY[$loop]} $((platformX[$loop]))
+            tput cup "${platformY[$loop]}" $((platformX["$loop"]))
             echo -en "\e[30;1m🭒"
-            while [[ $loops -lt $((platformW[$loop] - 2)) ]]; do
+            while [[ $loops -lt $((platformW["$loop"] - 2)) ]]; do
                 echo -en "█"
                 loops=$((loops + 1))
             done
@@ -112,7 +109,7 @@ input () {
     length=${#input}
     loop=1
     while [[ $loop -le $length ]]; do
-        inputf=$(echo $input | cut -c$loop-$loop)
+        inputf=$(echo "$input" | cut -c$loop-$loop)
         if [[ "$inputf" = "w" ]] && [[ $velY -eq 0 ]] && [[ $(collideY) -eq 1 ]]; then
             velY=$((velY-7))
         fi
@@ -133,7 +130,7 @@ input () {
         fi
         loop=$((loop + 1))
     done
-    read -t 0.0001 -n 10000 discard # Discard any saved keypresses when the input function ends
+    read -r -t 0.0001 -n 10000 _discard # Discard any saved keypresses when the input function ends
 }
 
 info () {
@@ -157,7 +154,7 @@ info () {
 textbox () {
     tput sc
     loop=0
-    str=$(echo "${3%%\\*}")
+    str=${3%%\\*}
     strlen=${#str}
     box=$(($2 - (strlen/2) - 2))
     boy=$(($1 - 1))
@@ -170,11 +167,11 @@ textbox () {
     done
     loop=0
     tput cup $boy $box && echo -en "╭$midln╮"
-    while [[ $loop -le $(($(echo "$3" | grep -o "\n" | wc -l) - 1)) ]]; do
+    while [[ $loop -le $(($(echo "$3" | grep -o 'n' | wc -l) - 1)) ]]; do
         tput cup $((boy + loop + 1)) $box && echo -en "│$midspc│"
         loop=$((loop + 1))
     done
-    tput cup $((boy + 1)) $((box + 2)) && echo -en $3
+    tput cup $((boy + 1)) $((box + 2)) && echo -en "$3"
     tput cup $((boy + loop + 1)) $box && echo -en "╰$midln╯"
     tput rc
 }
@@ -243,7 +240,10 @@ move () {
 collideY () {
     loop=0
     for value in "${platformY[@]}"; do
-        if [[ $((platformY[$loop] - (posY + 1))) -eq 0 ]] && [[ $((platformX[$loop] + platformW[$loop])) -gt $posX ]] && [[ ${platformX[$loop]} -le $posX ]]; then
+        if  [[ $((platformY["$loop"] - (posY + 1))) -eq 0 ]] &&
+            [[ $((platformX["$loop"] + platformW["$loop"])) -gt $posX ]] &&
+            [[ ${platformX["$loop"]} -le $posX ]];
+        then
             echo 1
             break
         fi
@@ -265,9 +265,9 @@ animate () {
 }
 
 char () {
-    tput cup $posY $((posX - 1)) && echo ""
-    tput cup $posY $posX && echo -e "${charcolor}${character}\e[0m"
-    tput cup $posY $((posX + 1)) && echo ""
+    tput cup "$posY" $((posX - 1)) && echo ""
+    tput cup "$posY" "$posX" && echo -e "${charcolor}${character}\e[0m"
+    tput cup "$posY" $((posX + 1)) && echo ""
 }
 
 render () {
